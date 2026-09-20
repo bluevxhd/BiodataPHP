@@ -1,0 +1,282 @@
+Langkah 1: Nyalakan XAMPP di Laptop
+Buka aplikasi XAMPP Control Panel di laptop kamu.
+Di bagian Apache, klik tombol Start (tunggu sampai warnanya hijau).
+Di bagian MySQL, klik tombol Start (tunggu sampai warnanya hijau).
+(Catatan: Apache dan MySQL harus tetap menyala selama kamu menjalankan program PHP).
+Langkah 2: Buat Database & Isi Datanya di phpMyAdmin
+PHP butuh tempat mengambil data MySQL kamu. Caranya sangat gampang:
+Buka Google Chrome di laptop, lalu ketik alamat ini di address bar:
+code
+Text
+http://localhost/phpmyadmin
+lalu tekan Enter.
+Klik menu Databases (atau Basis Data) di bagian atas.
+Pada kolom Create database, ketik nama: db_sekolah lalu klik Create.
+Setelah database db_sekolah terbuka di sebelah kiri, klik tab SQL di bagian atas.
+Salin (copy) dan tempel (paste) perintah SQL di bawah ini ke kotak putih tersebut:
+code
+SQL
+CREATE TABLE biodata (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100),
+    kelas VARCHAR(20),
+    tempat_tgl_lahir VARCHAR(100),
+    jenis_kelamin VARCHAR(20),
+    agama VARCHAR(20),
+    sekolah VARCHAR(100)
+);
+
+INSERT INTO biodata (nama, kelas, tempat_tgl_lahir, jenis_kelamin, agama, sekolah) 
+VALUES (
+    'Lionel Rodriquez Da Silva',
+    '10 E1',
+    'Jakarta, 04 - Juni - 2011',
+    'Laki-laki',
+    'Kristen',
+    'SMA Diakonia'
+);
+Klik tombol Go (atau Kirim) di pojok kanan bawah. Sekarang datamu sudah tersimpan di MySQL!
+Langkah 3: Buka VS Code & Buat File di Folder htdocs
+Agar file PHP bisa dibaca oleh localhost, file wajib ditaruh di dalam folder instalasi XAMPP (htdocs).
+Buka aplikasi VS Code.
+Klik menu File → Open Folder....
+Arahkan ke folder:
+code
+Text
+C:\xampp\htdocs
+(Klik tombol Select Folder).
+Di dalam folder htdocs, buat folder baru bernama: biodata
+Di dalam folder biodata tersebut, buat file baru dengan nama:
+code
+Text
+biodata.php
+Langkah 4: Salin Kode ke File biodata.php
+Tempelkan (paste) kode 1 file sederhana berikut ke dalam file biodata.php yang baru saja kamu buat di VS Code:
+code
+PHP
+<?php
+// 1. Koneksi ke Database MySQL (XAMPP)
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "db_sekolah";
+
+$koneksi = mysqli_connect($host, $user, $pass, $db);
+
+// Cek koneksi
+if (!$koneksi) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
+
+// 2. Ambil data dari tabel biodata
+$query = mysqli_query($koneksi, "SELECT * FROM biodata LIMIT 1");
+$data  = mysqli_fetch_array($query);
+
+// Mengatur agar browser menampilkan format teks rapi
+header('Content-Type: text/plain');
+
+// 3. Cetak teks biodata
+echo "========================================\n";
+echo "            BIODATA SISWA               \n";
+echo "========================================\n";
+echo "Nama Lengkap       : " . $data['nama'] . "\n";
+echo "Kelas              : " . $data['kelas'] . "\n";
+echo "Tempat, Tgl Lahir  : " . $data['tempat_tgl_lahir'] . "\n";
+echo "Jenis Kelamin      : " . $data['jenis_kelamin'] . "\n";
+echo "Agama              : " . $data['agama'] . "\n";
+echo "Sekolah            : " . $data['sekolah'] . "\n";
+echo "========================================\n";
+?>
+Setelah ditempel, tekan Ctrl + S pada keyboard untuk menyimpannya.
+Langkah 5: Run / Jalankan di Browser!
+Buka Google Chrome di laptop kamu.
+Ketik alamat ini di address bar:
+code
+Text
+http://localhost/biodata/biodata.php
+Tekan Enter.
+Berhasil! 🎉 Di layar browser kamu akan langsung muncul teks biodata kamu:
+code
+Text
+========================================
+            BIODATA SISWA               
+========================================
+Nama Lengkap       : Lionel Rodriquez Da Silva
+Kelas              : 10 E1
+Tempat, Tgl Lahir  : Jakarta, 04 - Juni - 2011
+Jenis Kelamin      : Laki-laki
+Agama              : Kristen
+Sekolah            : SMA Diakonia
+========================================
+blm muncul
+Image September 20, 2026 - 1:09PM
+Image September 20, 2026 - 1:09PM
+Gemini 3.8 Flash
+Ran for 6s
+lightbulb
+Thought for 6 seconds
+Penyebab layar putih kosong (blank) biasanya karena salah satu dari 3 hal ini:
+Kamu membukanya dengan cara klik ganda (double click) file biodata.php, sehingga di browser alamatnya jadi file:///C:/xampp/... (PHP tidak akan jalan jika dibuka lewat file:///, harus lewat http://localhost/...).
+Database di phpMyAdmin belum dibuat atau datanya masih kosong, sehingga PHP tidak menemukan apa yang mau dicetak.
+Ada pesan error yang tersembunyi.
+Solusi Praktis: Gunakan Kode Sakti (Otomatis Buat Database Sendiri)
+Ganti seluruh isi file biodata.php di VS Code kamu dengan kode di bawah ini. Kode ini sudah dilengkapi:
+Otomatis memunculkan pesan jika ada error (tidak akan layar putih polos lagi).
+Otomatis membuat database & mengisi biodata kamu jika di phpMyAdmin belum ada.
+Salin kode ini ke file biodata.php:
+code
+PHP
+<?php
+// 1. Tampilkan semua error agar layar tidak putih polos jika ada kendala
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// 2. Hubungkan ke MySQL XAMPP
+$koneksi = mysqli_connect("localhost", "root", "");
+
+if (!$koneksi) {
+    die("Koneksi ke MySQL gagal! Pastikan tombol Start MySQL di XAMPP sudah berwarna hijau.");
+}
+
+// 3. Otomatis buat database jika belum ada
+mysqli_query($koneksi, "CREATE DATABASE IF NOT EXISTS db_sekolah");
+mysqli_select_db($koneksi, "db_sekolah");
+
+// 4. Otomatis buat tabel jika belum ada
+$buatTabel = "CREATE TABLE IF NOT EXISTS biodata (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100),
+    kelas VARCHAR(20),
+    tempat_tgl_lahir VARCHAR(100),
+    jenis_kelamin VARCHAR(20),
+    agama VARCHAR(20),
+    sekolah VARCHAR(100)
+)";
+mysqli_query($koneksi, $buatTabel);
+
+// 5. Cek apakah sudah ada data, jika belum otomatis diisikan data Lionel
+$cek = mysqli_query($koneksi, "SELECT * FROM biodata LIMIT 1");
+if (mysqli_num_rows($cek) == 0) {
+    mysqli_query($koneksi, "INSERT INTO biodata (nama, kelas, tempat_tgl_lahir, jenis_kelamin, agama, sekolah) 
+    VALUES (
+        'Lionel Rodriquez Da Silva',
+        '10 E1',
+        'Jakarta, 04 - Juni - 2011',
+        'Laki-laki',
+        'Kristen',
+        'SMA Diakonia'
+    )");
+    $cek = mysqli_query($koneksi, "SELECT * FROM biodata LIMIT 1");
+}
+
+$data = mysqli_fetch_array($cek);
+
+// 6. Tampilkan ke layar dalam bentuk TEKS
+header("Content-Type: text/plain");
+
+echo "========================================\n";
+echo "            BIODATA SISWA               \n";
+echo "========================================\n";
+echo "Nama Lengkap       : " . $data['nama'] . "\n";
+echo "Kelas              : " . $data['kelas'] . "\n";
+echo "Tempat, Tgl Lahir  : " . $data['tempat_tgl_lahir'] . "\n";
+echo "Jenis Kelamin      : " . $data['jenis_kelamin'] . "\n";
+echo "Agama              : " . $data['agama'] . "\n";
+echo "Sekolah            : " . $data['sekolah'] . "\n";
+echo "========================================\n";
+?>
+Cara Membuka yang Benar di Browser (PENTING):
+Pastikan di aplikasi XAMPP Control Panel, Apache dan MySQL keduanya sudah diklik Start dan warnanya Hijau.
+Buka Google Chrome baru.
+Di kolom pencarian alamat (address bar paling atas), ketik manual:
+code
+Text
+http://localhost/biodata/biodata.php
+(Pastikan diawali dengan http://localhost/, bukan file:///).
+Tekan Enter.
+Teks biodatanya pasti langsung muncul di layar! Coba sekarang dan kabari hasilnya ya.
+tulisannya koneksi gagal unknown database db_sekolah
+Gemini 3.8 Flash
+Ran for 5s
+lightbulb
+Thought for 4 seconds
+Nah, itu dia penyebab utamanya! Pesan itu artinya MySQL kamu belum punya database bernama db_sekolah.
+Supaya kamu tidak perlu repot-repot buat database manual di phpMyAdmin, langsung ganti seluruh isi file biodata.php kamu di VS Code dengan kode di bawah ini.
+Kode ini sudah diperbaiki agar langsung otomatis membuatkan databasenya sendiri saat dijalankan:
+Salin kode ini ke biodata.php di VS Code:
+code
+PHP
+<?php
+// 1. Hubungkan ke MySQL terlebih dahulu (tanpa menyebutkan database dulu)
+$host = "localhost";
+$user = "root";
+$pass = "";
+
+$koneksi = mysqli_connect($host, $user, $pass);
+
+if (!$koneksi) {
+    die("Gagal tersambung ke MySQL! Pastikan XAMPP MySQL sudah Start (Hijau).");
+}
+
+// 2. Otomatis buat database db_sekolah jika belum ada
+mysqli_query($koneksi, "CREATE DATABASE IF NOT EXISTS db_sekolah");
+
+// 3. Masuk ke database db_sekolah
+mysqli_select_db($koneksi, "db_sekolah");
+
+// 4. Otomatis buat tabel biodata jika belum ada
+$tabel = "CREATE TABLE IF NOT EXISTS biodata (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100),
+    kelas VARCHAR(20),
+    tempat_tgl_lahir VARCHAR(100),
+    jenis_kelamin VARCHAR(20),
+    agama VARCHAR(20),
+    sekolah VARCHAR(100)
+)";
+mysqli_query($koneksi, $tabel);
+
+// 5. Cek apakah tabel masih kosong, jika kosong otomatis diisi data kamu
+$cek = mysqli_query($koneksi, "SELECT * FROM biodata LIMIT 1");
+if (mysqli_num_rows($cek) == 0) {
+    mysqli_query($koneksi, "INSERT INTO biodata (nama, kelas, tempat_tgl_lahir, jenis_kelamin, agama, sekolah) 
+    VALUES (
+        'Lionel Rodriquez Da Silva',
+        '10 E1',
+        'Jakarta, 04 - Juni - 2011',
+        'Laki-laki',
+        'Kristen',
+        'SMA Diakonia'
+    )");
+    $cek = mysqli_query($koneksi, "SELECT * FROM biodata LIMIT 1");
+}
+
+$data = mysqli_fetch_array($cek);
+
+// 6. Format tampilan layar sebagai teks polos rapi
+header("Content-Type: text/plain");
+
+echo "========================================\n";
+echo "            BIODATA SISWA               \n";
+echo "========================================\n";
+echo "Nama Lengkap       : " . $data['nama'] . "\n";
+echo "Kelas              : " . $data['kelas'] . "\n";
+echo "Tempat, Tgl Lahir  : " . $data['tempat_tgl_lahir'] . "\n";
+echo "Jenis Kelamin      : " . $data['jenis_kelamin'] . "\n";
+echo "Agama              : " . $data['agama'] . "\n";
+echo "Sekolah            : " . $data['sekolah'] . "\n";
+echo "========================================\n";
+?>
+Langkah Selanjutnya:
+Tekan Ctrl + S di VS Code untuk menyimpan file.
+Buka Google Chrome di alamat:
+code
+Text
+http://localhost/biodata/biodata.php
+Tekan F5 (atau klik tombol reload/refresh).
+Sekarang databasenya langsung dibuatkan otomatis oleh program dan teks biodata kamu pasti langsung tampil!
+lightbulb_tips
+Make changes, add new features, ask for anything
+
+Chat
+Preview
